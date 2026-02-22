@@ -1,0 +1,28 @@
+import{m as k}from"./module.esm-B6lOy9ag.js";import"./theme-switcher-D86AzGB8.js";const L=`<svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+>
+    <path
+        d="M6.2474 6.25033V2.91699H17.0807V13.7503H13.7474M13.7474 6.25033V17.0837H2.91406V6.25033H13.7474Z"
+        stroke="currentColor"
+        stroke-opacity="0.45"
+        stroke-linecap="round"
+    />
+</svg>
+`,S=`<svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+>
+    <path
+        d="M5 11.6471L8.52941 14L15 6"
+        stroke="currentColor"
+        stroke-linecap="square"
+    />
+</svg>
+`;let x=document.querySelectorAll("#main-content pre");const y=(o,t)=>{navigator.clipboard.writeText(o.innerText.trim()).then(()=>{t.innerHTML=S,setTimeout(()=>{t.innerHTML=L},1500)})};x.forEach(o=>{var t=document.createElement("div");["relative","code-block-wrapper"].forEach(r=>{t.classList.add(r)}),o.parentNode.insertBefore(t,o),t.appendChild(o);let e=document.createElement("button");e.innerHTML=L,["md:block","hidden"].forEach(r=>{e.classList.add(r)}),e.setAttribute("aria-label","Copy to Clipboard"),e.setAttribute("title","Copy to Clipboard"),e.classList.add("copyBtn");const i=t.closest(".tabbed-code");if(i){const r=i.querySelector(".tabbed-code-body");if(r.querySelector(".copyBtn")!==null)return;e.addEventListener("click",()=>{const s=i.querySelector(".active .torchlight-copy-target");y(s,e)}),r.appendChild(e)}else t.appendChild(e),e.addEventListener("click",()=>{const r=o.querySelector(".torchlight-copy-target");y(r,e)})});k.data("copyAsMarkdown",o=>({url:o,loading:!1,recentlyCopied:!1,async copy(){if(this.loading)return;this.loading=!0,this.recentlyCopied=!1;let t=!1;try{const e=fetch(this.url,{headers:{Accept:"text/markdown"}}).then(r=>{if(!r.ok)throw new Error(`Failed to fetch markdown: ${r.status}`);return r.text()}),i=new ClipboardItem({"text/plain":e.then(r=>new Blob([r],{type:"text/plain"}))});await navigator.clipboard.write([i]),t=!0}catch(e){throw console.error("Clipboard write() failed:",e),e}finally{this.loading=!1,t&&(this.recentlyCopied=!0,setTimeout(()=>{this.recentlyCopied=!1},2e3)),await this.log(t)}},async log(t){if(!(typeof rudderanalytics>"u"))try{rudderanalytics.track("Copy as Markdown Clicked",{action:"click",origin:"client",status:t?"success":"failed",element_type:"button",element_text:"Copy as markdown",element_context:"laravel_docs_top_right",element_description:"Button to copy docs in markdown format"})}catch{}}}));document.addEventListener("DOMContentLoaded",()=>{T(),q(),A();const o=document.querySelector("#skip-to-content-link"),t=document.querySelector("#main-content");o.addEventListener("click",e=>{e.preventDefault(),t.setAttribute("tabindex",-1),t.focus()}),t.addEventListener("blur",()=>{t.removeAttribute("tabindex")})});function A(){const o=document.querySelector(".docs_main"),t=document.querySelector("#on-this-page-content");if(!o||!t)return;const e=Array.from(o.querySelectorAll("h2, h3")),i=t.querySelectorAll("a"),r=new Map;i.forEach(n=>{const c=n.getAttribute("href");c&&c.startsWith("#")&&r.set(c.substring(1),n)});let s=null,u=window.scrollY,a="down",l=!1;if(window.location.hash){const n=window.location.hash.substring(1);r.has(n)&&(l=!0,setTimeout(()=>{d(n),setTimeout(()=>{l=!1},100)},0))}function h(){const n=window.scrollY;a=n>u?"down":"up",u=n}function d(n){n&&(s&&s.removeAttribute("data-active"),s=r.get(n),s&&s.setAttribute("data-active","true"))}i.forEach(n=>{n.addEventListener("click",()=>{const c=n.getAttribute("href");c&&c.startsWith("#")&&(l=!0,d(c.substring(1)),setTimeout(()=>{l=!1},100))})});const E=new IntersectionObserver(n=>{l||(h(),n.forEach(c=>{const f=c.target.getAttribute("id");if(!f)return;const b=e.findIndex(m=>m.getAttribute("id")===f);if(a==="down")c.isIntersecting&&d(f);else if(c.isIntersecting){const m=b>0?b-1:b;d(e[m].getAttribute("id"))}}))},{rootMargin:"0px 0px -80% 0px",threshold:0});e.forEach(n=>E.observe(n))}function T(){[...document.querySelectorAll(".docs_sidebar h2")].forEach(o=>{o.addEventListener("click",t=>{t.preventDefault();const e=o.parentNode.classList.contains("sub--on");[...document.querySelectorAll(".docs_sidebar ul li")].forEach(i=>i.classList.remove("sub--on")),e||o.parentNode.classList.add("sub--on")})})}function q(){function o(i){const r=new Date().valueOf();Array.from(i.rows).forEach((s,u)=>{if(u>0){const a=s.cells,l=a[0],h=g(a[a.length-2]),d=g(a[a.length-1]);r>d?l.classList.add("bg-red-500","support-policy-highlight"):r<=d&&r>h&&l.classList.add("bg-orange-600","support-policy-highlight")}})}const t=document.querySelector(".docs_main #support-policy ~ div table:first-of-type");if(t){o(t);return}const e=document.querySelector(".docs_main #support-policy ~ table:first-of-type");e&&o(e)}function g(o){return Date.parse(o.innerHTML.replace(/(\d+)(st|nd|rd|th)/,"$1"))}const p=document.querySelector(".sticky-side-nav"),v="h-[calc(100dvh-9rem)]",w="h-[calc(100dvh-5.5rem)]",M=new IntersectionObserver(o=>{o.forEach(t=>{t.isIntersecting?(p.classList.add(v),p.classList.remove(w)):(p.classList.add(w),p.classList.remove(v))})},{threshold:1}),C=document.querySelector("#main-content h1");C&&M.observe(C);k.start();
