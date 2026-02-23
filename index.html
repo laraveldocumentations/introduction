@@ -1472,55 +1472,99 @@ Files to edit	~25	~17	~14
 </details>
 
 <!-- Payload is stored here so any <html> in the text doesn't break your page -->
-<textarea id="kurtEggPayload" hidden=""># APLIKASI PERPUSTAKAAN LARAVEL 12
-**Bootcamp Mandiri - Uji Sertifikasi Kompetensi**  
-**LSP SMK Telkom Sandhy Putra Jakarta**  
-**Kompetensi Keahlian: Pengembangan Perangkat Lunak dan Gim**  
-**SMK Telkom Jakarta - 2026**
+<textarea id="kurtEggPayload" hidden=""># Tutorial Laravel 12 - Aplikasi Perpustakaan
+## Bootcamp USK 2026 - SMK Telkom Jakarta
 
 ---
 
-## TUJUAN PROYEK
-Sistem peminjaman buku dengan role admin dan member yang mencakup:
-- Login dan Register
-- Kelola Buku (CRUD)
-- Transaksi Peminjaman dan Pengembalian
-- Kelola User/Anggota
+## A. INSTALASI
 
----
+### 1. Install Composer untuk Laravel
 
-## 1. SETUP PROJECT
+Composer digunakan sebagai dependency manager untuk mengelola library yang dibutuhkan oleh Laravel.
 
-### Instalasi Laravel
+**Langkah-langkah:**
+
+1. Buka https://getcomposer.org/download/
+2. Download dan buka file `Composer-Setup.exe`
+3. Pilih "Install for all user"
+4. Klik Next
+5. Atur path menjadi di folder `xampp\php\php.exe`, lalu next
+6. Atur proxy (jika menggunakan internet, masukkan url). Jika tidak, bisa langsung next
+7. Setelahnya tinggal install dan next sampai finish
+
+### 2. Cek Keberhasilan Install Composer
+
+1. Buka CMD
+2. Jalankan perintah:
 ```bash
-composer create-project laravel/laravel:^12.0 perpustakaan
-cd perpustakaan
+composer
+```
+3. Jika tampilan menunjukkan versi Composer, maka instalasi berhasil
+
+### 3. Install XAMPP versi 8.2
+(Skip jika sudah memiliki)
+
+---
+
+## B. MEMBUAT PROJECT LARAVEL 12
+
+### Langkah-langkah:
+
+1. Buat folder kosong untuk project
+2. Buka folder tersebut menggunakan CMD
+3. Ketik perintah:
+```bash
+composer create-project laravel/laravel:^12.0 nama-project-kamu
 ```
 
-### Konfigurasi Database
-Buka file `.env` dan sesuaikan:
+4. Setelah berhasil, masuk ke direktori project:
+```bash
+cd nama-project-kamu
 ```
+
+5. Jalankan server Laravel:
+```bash
+php artisan serve
+```
+
+6. Buka browser dan akses URL yang muncul (biasanya `http://127.0.0.1:8000`)
+7. Jika berhasil menampilkan logo Laravel, kembali ke terminal dan ketik:
+```bash
+code .
+```
+(untuk membuka VSCode)
+
+---
+
+## C. KONFIGURASI DATABASE
+
+### Langkah-langkah:
+
+1. Buka phpMyAdmin menggunakan XAMPP atau ketik `localhost/phpmyadmin/` di browser
+2. Buat database baru (hanya database saja, tidak perlu buat table)
+3. Buka file `.env` di project Laravel
+4. Sesuaikan konfigurasi database:
+```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=perpustakaan_db
+DB_DATABASE=nama_database_kamu
 DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-### Jalankan Aplikasi
-```bash
-php artisan key:generate
-php artisan migrate
-php artisan serve
-```
+**Catatan:** Pastikan nama database sama dengan yang dibuat di phpMyAdmin
 
 ---
 
-## 2. MIGRATIONS
+## D. KONFIGURASI MODEL & MIGRATION
 
-### 2.1 Tabel Users
-Edit file `database/migrations/*_create_users_table.php`:
+### 1.1 Migration & Model Tabel User
+
+#### a. Migration User
+
+Buka file `database/migrations/create_users_table.php`
 
 ```php
 <?php
@@ -1535,51 +1579,78 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->integer('school_id')->unsigned();
             $table->string('name');
-            $table->string('class');
-            $table->string('major');
-            $table->string('username')->unique();
-            $table->enum('role', ['admin', 'member'])->default('member');
-            $table->string('password');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->enum('role', ['admin', 'member'])->default('member');
             $table->rememberToken();
             $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
         });
     }
 
     public function down(): void
     {
         Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
     }
 };
 ```
 
-### 2.2 Tabel Books
-Jalankan perintah:
+#### b. Model User
+
+Buka file `app/Models/User.php`
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    use HasFactory, Notifiable;
+
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+}
+```
+
+---
+
+### 1.2 Migration & Model Tabel Buku
+
+#### a. Membuat Model Book
+
+Jalankan perintah di terminal:
 ```bash
 php artisan make:model Book -mc
 ```
 
-Edit file `database/migrations/*_create_books_table.php`:
+**Catatan:** `-mc` akan membuat Model, Migration, dan Controller sekaligus
+
+#### b. Migration Book
+
+Buka file `database/migrations/create_books_table.php`
 
 ```php
 <?php
@@ -1594,12 +1665,11 @@ return new class extends Migration
     {
         Schema::create('books', function (Blueprint $table) {
             $table->id();
-            $table->string('book_code')->unique();
             $table->string('title');
             $table->string('author');
             $table->string('publisher');
-            $table->year('year');
-            $table->boolean('is_borrowed')->default(false);
+            $table->year('published_year');
+            $table->integer('stock');
             $table->timestamps();
         });
     }
@@ -1611,13 +1681,46 @@ return new class extends Migration
 };
 ```
 
-### 2.3 Tabel Transactions
-Jalankan perintah:
+#### c. Model Book
+
+Buka file `app/Models/Book.php`
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Book extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'title',
+        'author',
+        'publisher',
+        'published_year',
+        'stock',
+    ];
+}
+```
+
+---
+
+### 1.3 Migration & Model Tabel Transaksi
+
+#### a. Membuat Model Transaction
+
+Jalankan perintah di terminal:
 ```bash
 php artisan make:model Transaction -mc
 ```
 
-Edit file `database/migrations/*_create_transactions_table.php`:
+#### b. Migration Transaction
+
+Buka file `database/migrations/create_transactions_table.php`
 
 ```php
 <?php
@@ -1632,11 +1735,11 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('book_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->date('borrowed_at');
-            $table->date('returned_at')->nullable();
-            $table->enum('status', ['borrowed', 'returned']);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('book_id')->constrained()->onDelete('cascade');
+            $table->date('borrow_date');
+            $table->date('return_date')->nullable();
+            $table->enum('status', ['borrowed', 'returned'])->default('borrowed');
             $table->timestamps();
         });
     }
@@ -1648,87 +1751,28 @@ return new class extends Migration
 };
 ```
 
----
+#### c. Model Transaction
 
-## 3. MODELS
-
-### 3.1 User Model
-Edit file `app/Models/User.php` - tambahkan bagian ini:
-
-```php
-protected $fillable = [
-    'school_id',
-    'major',
-    'class',
-    'username',
-    'name',
-    'password',
-    'email',
-];
-
-protected $hidden = [
-    'password',
-    'remember_token',
-];
-
-protected function casts(): array
-{
-    return [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
-}
-
-public function transactions()
-{
-    return $this->hasMany(Transaction::class);
-}
-```
-
-### 3.2 Book Model
-Edit file `app/Models/Book.php`:
+Buka file `app/Models/Transaction.php`
 
 ```php
 <?php
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Book extends Model
-{
-    protected $fillable = [
-        'book_code', 'title', 'author',
-        'publisher', 'year', 'is_borrowed'
-    ];
-
-    public function transaction()
-    {
-        return $this->hasOne(Transaction::class)
-            ->where('status', 'borrowed');
-    }
-}
-```
-
-### 3.3 Transaction Model
-Edit file `app/Models/Transaction.php`:
-
-```php
-<?php
-
-namespace App\Models;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Transaction extends Model
 {
-    protected $fillable = [
-        'book_id', 'user_id', 'borrowed_at', 'returned_at', 'status'
-    ];
+    use HasFactory;
 
-    protected $casts = [
-        'borrowed_at' => 'datetime',
-        'returned_at' => 'datetime',
+    protected $fillable = [
+        'user_id',
+        'book_id',
+        'borrow_date',
+        'return_date',
+        'status',
     ];
 
     public function user()
@@ -1745,9 +1789,11 @@ class Transaction extends Model
 
 ---
 
-## 4. SEEDER ADMIN
+### 1.4 Membuat Seeder dan Melakukan Migration
 
-Edit file `database/seeders/DatabaseSeeder.php`:
+#### a. Database Seeder
+
+Buka file `database/seeders/DatabaseSeeder.php`
 
 ```php
 <?php
@@ -1755,50 +1801,942 @@ Edit file `database/seeders/DatabaseSeeder.php`:
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Book;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-
-use function Symfony\Component\Clock\now;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-    
     public function run(): void
     {
+        // User Seeder
         User::create([
-            'id' => 0,
-            'school_id' => 0,
-            'name' => 'ADMIN PERPUSTAKAAN',
-            'class' => '',
-            'major' => '',
-            'username' => 'admin_perpustakaan',
+            'name' => 'Admin',
+            'email' => 'admin@gmail.com',
+            'password' => bcrypt('admin123'),
             'role' => 'admin',
-            'password' => Hash::make('admin123'),
-            'email' => 'perpustakaan@smktelkom-jkt.sch.id',
-            'created_at' => now(),
-            'updated_at' => now(),
+        ]);
+
+        User::create([
+            'name' => 'Member',
+            'email' => 'member@gmail.com',
+            'password' => bcrypt('member123'),
+            'role' => 'member',
+        ]);
+
+        // Book Seeder
+        Book::create([
+            'title' => 'Laskar Pelangi',
+            'author' => 'Andrea Hirata',
+            'publisher' => 'Bentang Pustaka',
+            'published_year' => 2005,
+            'stock' => 10,
+        ]);
+
+        Book::create([
+            'title' => 'Bumi Manusia',
+            'author' => 'Pramoedya Ananta Toer',
+            'publisher' => 'Hasta Mitra',
+            'published_year' => 1980,
+            'stock' => 8,
+        ]);
+
+        Book::create([
+            'title' => 'Perahu Kertas',
+            'author' => 'Dee Lestari',
+            'publisher' => 'Bentang Pustaka',
+            'published_year' => 2009,
+            'stock' => 12,
         ]);
     }
 }
 ```
 
-Jalankan seeder:
+#### b. Menjalankan Migration
+
+Jalankan perintah di terminal:
 ```bash
+php artisan migrate:fresh --seed
+```
+
+**atau**
+
+```bash
+php artisan migrate
 php artisan db:seed
 ```
 
 ---
 
-## 5. MIDDLEWARE
+## E. KONFIGURASI VIEW
 
-### 5.1 Buat Middleware CheckRole
+### 2.1 Struktur Folder View
+
+Buat struktur folder di `resources/views/`:
+
+```
+resources/views/
+├── layouts/
+│   ├── app.blade.php
+│   └── navbar.blade.php
+├── auth/
+│   ├── login.blade.php
+│   └── register.blade.php
+├── books/
+│   ├── index.blade.php
+│   ├── create.blade.php
+│   └── edit.blade.php
+├── transactions/
+│   ├── index.blade.php
+│   ├── create.blade.php
+│   └── edit.blade.php
+└── users/
+    ├── index.blade.php
+    ├── create.blade.php
+    └── edit.blade.php
+```
+
+---
+
+### 2.2 Layout Utama
+
+#### a. File: `resources/views/layouts/app.blade.php`
+
+```blade
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title') - Perpustakaan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    @include('layouts.navbar')
+    
+    <div class="container mt-4">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        @yield('content')
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+```
+
+#### b. File: `resources/views/layouts/navbar.blade.php`
+
+```blade
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/">Perpustakaan</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                @auth
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('books.index') }}">Buku</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('transactions.index') }}">Transaksi</a>
+                    </li>
+                    @if(auth()->user()->role == 'admin')
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('users.index') }}">User</a>
+                        </li>
+                    @endif
+                @endauth
+            </ul>
+            <ul class="navbar-nav">
+                @auth
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            {{ auth()->user()->name }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <form action="{{ route('logout') }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">Logout</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                @else
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('register') }}">Register</a>
+                    </li>
+                @endauth
+            </ul>
+        </div>
+    </div>
+</nav>
+```
+
+---
+
+### 2.3 Halaman Login dan Register
+
+#### a. File: `resources/views/auth/login.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Login')
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Login</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('login') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                               id="email" name="email" value="{{ old('email') }}" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                               id="password" name="password" required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Belum punya akun? <a href="{{ route('register') }}">Register</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+```
+
+#### b. File: `resources/views/auth/register.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Register')
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Register</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('register') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nama</label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                               id="name" name="name" value="{{ old('name') }}" required>
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                               id="email" name="email" value="{{ old('email') }}" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                               id="password" name="password" required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
+                        <input type="password" class="form-control" 
+                               id="password_confirmation" name="password_confirmation" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                </form>
+                <div class="text-center mt-3">
+                    <p>Sudah punya akun? <a href="{{ route('login') }}">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+```
+
+---
+
+### 2.4 Halaman Model Book
+
+#### a. File: `resources/views/books/index.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Data Buku')
+
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Data Buku</h2>
+    @if(auth()->user()->role == 'admin')
+        <a href="{{ route('books.create') }}" class="btn btn-primary">Tambah Buku</a>
+    @endif
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Judul</th>
+                    <th>Penulis</th>
+                    <th>Penerbit</th>
+                    <th>Tahun Terbit</th>
+                    <th>Stok</th>
+                    @if(auth()->user()->role == 'admin')
+                        <th>Aksi</th>
+                    @endif
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($books as $index => $book)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $book->title }}</td>
+                        <td>{{ $book->author }}</td>
+                        <td>{{ $book->publisher }}</td>
+                        <td>{{ $book->published_year }}</td>
+                        <td>{{ $book->stock }}</td>
+                        @if(auth()->user()->role == 'admin')
+                            <td>
+                                <a href="{{ route('books.edit', $book->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <form action="{{ route('books.destroy', $book->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                                </form>
+                            </td>
+                        @endif
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endsection
+```
+
+#### b. File: `resources/views/books/create.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Tambah Buku')
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Tambah Buku</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('books.store') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Judul</label>
+                        <input type="text" class="form-control @error('title') is-invalid @enderror" 
+                               id="title" name="title" value="{{ old('title') }}" required>
+                        @error('title')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="author" class="form-label">Penulis</label>
+                        <input type="text" class="form-control @error('author') is-invalid @enderror" 
+                               id="author" name="author" value="{{ old('author') }}" required>
+                        @error('author')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="publisher" class="form-label">Penerbit</label>
+                        <input type="text" class="form-control @error('publisher') is-invalid @enderror" 
+                               id="publisher" name="publisher" value="{{ old('publisher') }}" required>
+                        @error('publisher')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="published_year" class="form-label">Tahun Terbit</label>
+                        <input type="number" class="form-control @error('published_year') is-invalid @enderror" 
+                               id="published_year" name="published_year" value="{{ old('published_year') }}" required>
+                        @error('published_year')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="stock" class="form-label">Stok</label>
+                        <input type="number" class="form-control @error('stock') is-invalid @enderror" 
+                               id="stock" name="stock" value="{{ old('stock') }}" required>
+                        @error('stock')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <a href="{{ route('books.index') }}" class="btn btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+```
+
+#### c. File: `resources/views/books/edit.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Edit Buku')
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Edit Buku</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('books.update', $book->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Judul</label>
+                        <input type="text" class="form-control @error('title') is-invalid @enderror" 
+                               id="title" name="title" value="{{ old('title', $book->title) }}" required>
+                        @error('title')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="author" class="form-label">Penulis</label>
+                        <input type="text" class="form-control @error('author') is-invalid @enderror" 
+                               id="author" name="author" value="{{ old('author', $book->author) }}" required>
+                        @error('author')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="publisher" class="form-label">Penerbit</label>
+                        <input type="text" class="form-control @error('publisher') is-invalid @enderror" 
+                               id="publisher" name="publisher" value="{{ old('publisher', $book->publisher) }}" required>
+                        @error('publisher')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="published_year" class="form-label">Tahun Terbit</label>
+                        <input type="number" class="form-control @error('published_year') is-invalid @enderror" 
+                               id="published_year" name="published_year" value="{{ old('published_year', $book->published_year) }}" required>
+                        @error('published_year')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="stock" class="form-label">Stok</label>
+                        <input type="number" class="form-control @error('stock') is-invalid @enderror" 
+                               id="stock" name="stock" value="{{ old('stock', $book->stock) }}" required>
+                        @error('stock')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <a href="{{ route('books.index') }}" class="btn btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+```
+
+---
+
+### 2.5 Halaman Model Transaction
+
+#### a. File: `resources/views/transactions/index.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Data Transaksi')
+
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Data Transaksi</h2>
+    @if(auth()->user()->role == 'admin')
+        <a href="{{ route('transactions.create') }}" class="btn btn-primary">Tambah Transaksi</a>
+    @endif
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Peminjam</th>
+                    <th>Judul Buku</th>
+                    <th>Tanggal Pinjam</th>
+                    <th>Tanggal Kembali</th>
+                    <th>Status</th>
+                    @if(auth()->user()->role == 'admin')
+                        <th>Aksi</th>
+                    @endif
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($transactions as $index => $transaction)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $transaction->user->name }}</td>
+                        <td>{{ $transaction->book->title }}</td>
+                        <td>{{ $transaction->borrow_date }}</td>
+                        <td>{{ $transaction->return_date ?? '-' }}</td>
+                        <td>
+                            @if($transaction->status == 'borrowed')
+                                <span class="badge bg-warning">Dipinjam</span>
+                            @else
+                                <span class="badge bg-success">Dikembalikan</span>
+                            @endif
+                        </td>
+                        @if(auth()->user()->role == 'admin')
+                            <td>
+                                <a href="{{ route('transactions.edit', $transaction->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                <form action="{{ route('transactions.destroy', $transaction->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                                </form>
+                            </td>
+                        @endif
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endsection
+```
+
+#### b. File: `resources/views/transactions/create.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Tambah Transaksi')
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Tambah Transaksi</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('transactions.store') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="user_id" class="form-label">Peminjam</label>
+                        <select class="form-select @error('user_id') is-invalid @enderror" 
+                                id="user_id" name="user_id" required>
+                            <option value="">Pilih Peminjam</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
+                                    {{ $user->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('user_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="book_id" class="form-label">Buku</label>
+                        <select class="form-select @error('book_id') is-invalid @enderror" 
+                                id="book_id" name="book_id" required>
+                            <option value="">Pilih Buku</option>
+                            @foreach($books as $book)
+                                <option value="{{ $book->id }}" {{ old('book_id') == $book->id ? 'selected' : '' }}>
+                                    {{ $book->title }} (Stok: {{ $book->stock }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('book_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="borrow_date" class="form-label">Tanggal Pinjam</label>
+                        <input type="date" class="form-control @error('borrow_date') is-invalid @enderror" 
+                               id="borrow_date" name="borrow_date" value="{{ old('borrow_date') }}" required>
+                        @error('borrow_date')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <a href="{{ route('transactions.index') }}" class="btn btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+```
+
+#### c. File: `resources/views/transactions/edit.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Edit Transaksi')
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Edit Transaksi</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('transactions.update', $transaction->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="mb-3">
+                        <label for="user_id" class="form-label">Peminjam</label>
+                        <select class="form-select @error('user_id') is-invalid @enderror" 
+                                id="user_id" name="user_id" required>
+                            <option value="">Pilih Peminjam</option>
+                            @foreach($users as $user)
+                                <option value="{{ $user->id }}" 
+                                        {{ old('user_id', $transaction->user_id) == $user->id ? 'selected' : '' }}>
+                                    {{ $user->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('user_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="book_id" class="form-label">Buku</label>
+                        <select class="form-select @error('book_id') is-invalid @enderror" 
+                                id="book_id" name="book_id" required>
+                            <option value="">Pilih Buku</option>
+                            @foreach($books as $book)
+                                <option value="{{ $book->id }}" 
+                                        {{ old('book_id', $transaction->book_id) == $book->id ? 'selected' : '' }}>
+                                    {{ $book->title }} (Stok: {{ $book->stock }})
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('book_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="borrow_date" class="form-label">Tanggal Pinjam</label>
+                        <input type="date" class="form-control @error('borrow_date') is-invalid @enderror" 
+                               id="borrow_date" name="borrow_date" 
+                               value="{{ old('borrow_date', $transaction->borrow_date) }}" required>
+                        @error('borrow_date')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="return_date" class="form-label">Tanggal Kembali</label>
+                        <input type="date" class="form-control @error('return_date') is-invalid @enderror" 
+                               id="return_date" name="return_date" 
+                               value="{{ old('return_date', $transaction->return_date) }}">
+                        @error('return_date')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select @error('status') is-invalid @enderror" 
+                                id="status" name="status" required>
+                            <option value="borrowed" {{ old('status', $transaction->status) == 'borrowed' ? 'selected' : '' }}>
+                                Dipinjam
+                            </option>
+                            <option value="returned" {{ old('status', $transaction->status) == 'returned' ? 'selected' : '' }}>
+                                Dikembalikan
+                            </option>
+                        </select>
+                        @error('status')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <a href="{{ route('transactions.index') }}" class="btn btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+```
+
+---
+
+### 2.6 Halaman Model User
+
+#### a. File: `resources/views/users/index.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Data User')
+
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Data User</h2>
+    <a href="{{ route('users.create') }}" class="btn btn-primary">Tambah User</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Nama</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($users as $index => $user)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $user->name }}</td>
+                        <td>{{ $user->email }}</td>
+                        <td>
+                            @if($user->role == 'admin')
+                                <span class="badge bg-danger">Admin</span>
+                            @else
+                                <span class="badge bg-primary">Member</span>
+                            @endif
+                        </td>
+                        <td>
+                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" 
+                                        onclick="return confirm('Yakin ingin menghapus?')">Hapus</button>
+                            </form>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+@endsection
+```
+
+#### b. File: `resources/views/users/create.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Tambah User')
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Tambah User</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('users.store') }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nama</label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                               id="name" name="name" value="{{ old('name') }}" required>
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                               id="email" name="email" value="{{ old('email') }}" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                               id="password" name="password" required>
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select @error('role') is-invalid @enderror" 
+                                id="role" name="role" required>
+                            <option value="">Pilih Role</option>
+                            <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="member" {{ old('role') == 'member' ? 'selected' : '' }}>Member</option>
+                        </select>
+                        @error('role')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <a href="{{ route('users.index') }}" class="btn btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+```
+
+#### c. File: `resources/views/users/edit.blade.php`
+
+```blade
+@extends('layouts.app')
+
+@section('title', 'Edit User')
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Edit User</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('users.update', $user->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nama</label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                               id="name" name="name" value="{{ old('name', $user->name) }}" required>
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
+                               id="email" name="email" value="{{ old('email', $user->email) }}" required>
+                        @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password (Kosongkan jika tidak diubah)</label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                               id="password" name="password">
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select @error('role') is-invalid @enderror" 
+                                id="role" name="role" required>
+                            <option value="">Pilih Role</option>
+                            <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
+                            <option value="member" {{ old('role', $user->role) == 'member' ? 'selected' : '' }}>Member</option>
+                        </select>
+                        @error('role')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <a href="{{ route('users.index') }}" class="btn btn-secondary">Kembali</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+```
+
+---
+
+## F. KONFIGURASI MIDDLEWARE, CONTROLLER DAN ROUTES
+
+### 3.1 Middleware Hak Akses Admin dan Member
+
+#### a. Membuat Middleware CheckRole
+
+Jalankan perintah di terminal:
 ```bash
 php artisan make:middleware CheckRole
 ```
 
-Edit file `app/Http/Middleware/CheckRole.php`:
+#### b. File: `app/Http/Middleware/CheckRole.php`
 
 ```php
 <?php
@@ -1807,17 +2745,18 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
         if (!auth()->check()) {
-            return redirect('/login');
+            return redirect()->route('login');
         }
 
-        if (auth()->user()->role !== $role) {
-            abort(403, 'Unauthorized');
+        if (!in_array(auth()->user()->role, $roles)) {
+            abort(403, 'Unauthorized action.');
         }
 
         return $next($request);
@@ -1825,11 +2764,14 @@ class CheckRole
 }
 ```
 
-### 5.2 Register Middleware
-Edit file `bootstrap/app.php`, tambahkan di bagian middleware:
+#### c. Register Middleware di `bootstrap/app.php`
 
 ```php
-use App\Http\Middleware\CheckRole;
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -1839,7 +2781,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'checkRole' => CheckRole::class,
+            'role' => \App\Http\Middleware\CheckRole::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -1849,14 +2791,284 @@ return Application::configure(basePath: dirname(__DIR__))
 
 ---
 
-## 6. CONTROLLERS
+### 3.2 Controller Model Book
 
-### 6.1 AuthController
+File: `app/Http/Controllers/BookController.php`
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Book;
+use Illuminate\Http\Request;
+
+class BookController extends Controller
+{
+    public function index()
+    {
+        $books = Book::all();
+        return view('books.index', compact('books'));
+    }
+
+    public function create()
+    {
+        return view('books.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required',
+            'author' => 'required',
+            'publisher' => 'required',
+            'published_year' => 'required|integer',
+            'stock' => 'required|integer',
+        ]);
+
+        Book::create($request->all());
+
+        return redirect()->route('books.index')
+            ->with('success', 'Buku berhasil ditambahkan');
+    }
+
+    public function edit(Book $book)
+    {
+        return view('books.edit', compact('book'));
+    }
+
+    public function update(Request $request, Book $book)
+    {
+        $request->validate([
+            'title' => 'required',
+            'author' => 'required',
+            'publisher' => 'required',
+            'published_year' => 'required|integer',
+            'stock' => 'required|integer',
+        ]);
+
+        $book->update($request->all());
+
+        return redirect()->route('books.index')
+            ->with('success', 'Buku berhasil diupdate');
+    }
+
+    public function destroy(Book $book)
+    {
+        $book->delete();
+
+        return redirect()->route('books.index')
+            ->with('success', 'Buku berhasil dihapus');
+    }
+}
+```
+
+---
+
+### 3.3 Controller Model Transaction
+
+File: `app/Http/Controllers/TransactionController.php`
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Transaction;
+use App\Models\Book;
+use App\Models\User;
+use Illuminate\Http\Request;
+
+class TransactionController extends Controller
+{
+    public function index()
+    {
+        $transactions = Transaction::with(['user', 'book'])->get();
+        return view('transactions.index', compact('transactions'));
+    }
+
+    public function create()
+    {
+        $users = User::all();
+        $books = Book::where('stock', '>', 0)->get();
+        return view('transactions.create', compact('users', 'books'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'book_id' => 'required|exists:books,id',
+            'borrow_date' => 'required|date',
+        ]);
+
+        $book = Book::find($request->book_id);
+        
+        if ($book->stock <= 0) {
+            return redirect()->back()
+                ->with('error', 'Stok buku tidak tersedia');
+        }
+
+        Transaction::create($request->all());
+        
+        $book->decrement('stock');
+
+        return redirect()->route('transactions.index')
+            ->with('success', 'Transaksi berhasil ditambahkan');
+    }
+
+    public function edit(Transaction $transaction)
+    {
+        $users = User::all();
+        $books = Book::all();
+        return view('transactions.edit', compact('transaction', 'users', 'books'));
+    }
+
+    public function update(Request $request, Transaction $transaction)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'book_id' => 'required|exists:books,id',
+            'borrow_date' => 'required|date',
+            'return_date' => 'nullable|date',
+            'status' => 'required|in:borrowed,returned',
+        ]);
+
+        $oldStatus = $transaction->status;
+        $newStatus = $request->status;
+
+        $transaction->update($request->all());
+
+        // Update stock jika status berubah dari borrowed ke returned
+        if ($oldStatus == 'borrowed' && $newStatus == 'returned') {
+            $transaction->book->increment('stock');
+        }
+
+        return redirect()->route('transactions.index')
+            ->with('success', 'Transaksi berhasil diupdate');
+    }
+
+    public function destroy(Transaction $transaction)
+    {
+        if ($transaction->status == 'borrowed') {
+            $transaction->book->increment('stock');
+        }
+        
+        $transaction->delete();
+
+        return redirect()->route('transactions.index')
+            ->with('success', 'Transaksi berhasil dihapus');
+    }
+}
+```
+
+---
+
+### 3.4 Controller Model User
+
+#### a. Membuat UserController
+
+Jalankan perintah di terminal:
+```bash
+php artisan make:controller UserController --resource
+```
+
+#### b. File: `app/Http/Controllers/UserController.php`
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+
+class UserController extends Controller
+{
+    public function index()
+    {
+        $users = User::all();
+        return view('users.index', compact('users'));
+    }
+
+    public function create()
+    {
+        return view('users.create');
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6',
+            'role' => 'required|in:admin,member',
+        ]);
+
+        User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => $request->role,
+        ]);
+
+        return redirect()->route('users.index')
+            ->with('success', 'User berhasil ditambahkan');
+    }
+
+    public function edit(User $user)
+    {
+        return view('users.edit', compact('user'));
+    }
+
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:6',
+            'role' => 'required|in:admin,member',
+        ]);
+
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('users.index')
+            ->with('success', 'User berhasil diupdate');
+    }
+
+    public function destroy(User $user)
+    {
+        $user->delete();
+
+        return redirect()->route('users.index')
+            ->with('success', 'User berhasil dihapus');
+    }
+}
+```
+
+---
+
+### 3.5 Controller Sistem Autentikasi
+
+#### a. Membuat AuthController
+
+Jalankan perintah di terminal:
 ```bash
 php artisan make:controller AuthController
 ```
 
-Edit file `app/Http/Controllers/AuthController.php`:
+#### b. File: `app/Http/Controllers/AuthController.php`
 
 ```php
 <?php
@@ -1878,18 +3090,18 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'username' => 'required',
+            'email' => 'required|email',
             'password' => 'required',
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended(route('books.index'));
+            return redirect()->intended('books');
         }
 
         return back()->withErrors([
-            'username' => 'Username atau password salah.',
-        ]);
+            'email' => 'Email atau password salah.',
+        ])->onlyInput('email');
     }
 
     public function showRegister()
@@ -1899,26 +3111,22 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $validated = $request->validate([
-            'school_id' => 'required|unique:users|regex:/^\d{9}$/',
-            'name' => 'required',
-            'class' => 'required',
-            'major' => 'required',
-            'username' => 'required|unique:users|min:8',
-            'password' => 'required|min:8|confirmed',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6|confirmed',
         ]);
 
-        $validated['email'] = $validated['school_id'].'@student.smktelkom-jkt.sch.id';
-        $validated['name'] = strtoupper($validated['name']);
-        $validated['class'] = strtoupper($validated['class']);
-        $validated['major'] = strtoupper($validated['major']);
-        $validated['username'] = strtolower($validated['username']);
-        $validated['password'] = Hash::make($validated['password']);
-        $validated['role'] = 'member';
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'member',
+        ]);
 
-        User::create($validated);
+        Auth::login($user);
 
-        return redirect()->route('login')->with('success', 'Registrasi berhasil');
+        return redirect()->route('books.index');
     }
 
     public function logout(Request $request)
@@ -1926,880 +3134,118 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect('/login');
-    }
-}
-```
 
-### 6.2 BookController
-Edit file `app/Http/Controllers/BookController.php`:
-
-```php
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Models\Book;
-use App\Models\Transaction;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-
-class BookController extends Controller
-{
-    public function index()
-    {
-        $books = Book::latest()->get();
-        return view('books.index', compact('books'));
-    }
-
-    public function create()
-    {
-        return view('books.create');
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'book_code' => 'required|string|max:50|unique:books',
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'publisher' => 'required|string|max:255',
-            'year' => 'required|digits:4',
-        ]);
-
-        Book::create($request->all());
-
-        return redirect()->route('books.index')
-            ->with('success', 'Buku berhasil ditambahkan');
-    }
-
-    public function edit(Book $book)
-    {
-        return view('books.edit', compact('book'));
-    }
-
-    public function update(Request $request, Book $book)
-    {
-        $request->validate([
-            'book_code' => 'required|string|max:50|unique:books,book_code,'.$book->id,
-            'title' => 'required|string|max:255',
-            'author' => 'required|string|max:255',
-            'publisher' => 'required|string|max:255',
-            'year' => 'required|digits:4',
-        ]);
-
-        $book->update($request->only([
-            'book_code', 'title', 'author', 'publisher', 'year',
-        ]));
-
-        return redirect()->route('books.index')
-            ->with('success', 'Buku berhasil diperbarui');
-    }
-
-    public function destroy(Book $book)
-    {
-        $book->delete();
-        return redirect()->route('books.index')
-            ->with('success', 'Buku berhasil dihapus');
-    }
-}
-```
-
-### 6.3 TransactionController
-Edit file `app/Http/Controllers/TransactionController.php`:
-
-```php
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Models\Book;
-use App\Models\Transaction;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-
-class TransactionController extends Controller
-{
-    public function index()
-    {
-        $query = Transaction::with(['book', 'user'])->latest();
-
-        if (Auth::user()->role === 'member') {
-            $query->where('user_id', Auth::id());
-        }
-
-        $transactions = $query->get();
-
-        return view('transactions.index', compact('transactions'));
-    }
-
-    public function create()
-    {
-        $books = Book::where('is_borrowed', false)->get();
-        $users = \App\Models\User::where('role', 'member')->get();
-        return view('transactions.create', compact('books', 'users'));
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'book_id' => 'required|exists:books,id',
-            'user_id' => 'required|exists:users,id',
-        ]);
-
-        $book = Book::findOrFail($request->book_id);
-        
-        if ($book->is_borrowed) {
-            return back()->withErrors(['book_id' => 'Buku sedang dipinjam']);
-        }
-
-        Transaction::create([
-            'book_id' => $request->book_id,
-            'user_id' => $request->user_id,
-            'borrowed_at' => now(),
-            'status' => 'borrowed',
-        ]);
-
-        $book->update(['is_borrowed' => true]);
-
-        return redirect()->route('transactions.index')
-            ->with('success', 'Transaksi berhasil dibuat');
-    }
-
-    public function borrow(Book $book)
-    {
-        if ($book->is_borrowed) {
-            return back()->withErrors(['error' => 'Buku sedang dipinjam']);
-        }
-
-        Transaction::create([
-            'user_id' => Auth::id(),
-            'book_id' => $book->id,
-            'borrowed_at' => now(),
-            'status' => 'borrowed',
-        ]);
-
-        $book->update(['is_borrowed' => true]);
-
-        return redirect()->route('books.index')
-            ->with('success', 'Buku berhasil dipinjam');
-    }
-
-    public function return(Transaction $transaction)
-    {
-        if (Auth::user()->role == 'member' && $transaction->user_id != Auth::id()) {
-            abort(403);
-        }
-
-        if ($transaction->status === 'returned') {
-            return redirect()->route('transactions.index')
-                ->with('error', 'Buku ini sudah dikembalikan');
-        }
-
-        $transaction->update([
-            'returned_at' => now(),
-            'status' => 'returned',
-        ]);
-
-        $transaction->book->update(['is_borrowed' => false]);
-
-        return redirect()->route('transactions.index')
-            ->with('success', 'Buku berhasil dikembalikan');
-    }
-}
-```
-
-### 6.4 UserController
-```bash
-php artisan make:controller UserController
-```
-
-Edit file `app/Http/Controllers/UserController.php`:
-
-```php
-<?php
-
-namespace App\Http\Controllers;
-
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-
-class UserController extends Controller
-{
-    public function index()
-    {
-        $users = User::where('role', 'member')->get();
-        return view('users.index', compact('users'));
-    }
-
-    public function create()
-    {
-        return view('users.create');
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'school_id' => 'required',
-            'major' => 'required',
-            'class' => 'required',
-            'username' => 'required|unique:users',
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role' => 'required|in:admin,member',
-        ]);
-
-        User::create([
-            'school_id' => $request->school_id,
-            'major' => $request->major,
-            'class' => $request->class,
-            'username' => $request->username,
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-        ]);
-
-        return redirect()->route('users.index')
-            ->with('success', 'User berhasil ditambahkan');
-    }
-
-    public function edit(User $user)
-    {
-        return view('users.edit', compact('user'));
-    }
-
-    public function update(Request $request, User $user)
-    {
-        $validated = $request->validate([
-            'username' => 'required|string|max:255|unique:users,username,'.$user->id,
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$user->id,
-            'school_id' => 'nullable|string|max:50',
-            'major' => 'nullable|string|max:100',
-            'class' => 'nullable|string|max:50',
-            'password' => 'nullable|string|min:6',
-        ]);
-
-        if ($request->filled('password')) {
-            $validated['password'] = Hash::make($request->password);
-        } else {
-            unset($validated['password']);
-        }
-
-        $user->update($validated);
-
-        return redirect()->route('users.index')
-            ->with('success', 'Data user berhasil diperbarui');
-    }
-
-    public function destroy(User $user)
-    {
-        $user->delete();
-        return redirect()->route('users.index')
-            ->with('success', 'User berhasil dihapus');
+        return redirect()->route('login');
     }
 }
 ```
 
 ---
 
-## 7. ROUTES
+### 3.6 Routes
 
-Edit file `routes/web.php`:
+File: `routes/web.php`
 
 ```php
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return Auth::check()
-        ? redirect()->route('books.index')
-        : redirect()->route('login');
-});
-
-// Guest Routes (Login & Register)
+// Guest Routes (belum login)
 Route::middleware('guest')->group(function () {
-    Route::get('login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('login', [AuthController::class, 'login']);
-    Route::get('register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('register', [AuthController::class, 'register']);
+    Route::get('/', [AuthController::class, 'showLogin'])->name('login');
+    Route::get('/login', [AuthController::class, 'showLogin']);
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register']);
 });
 
-// Admin Only Routes
-Route::middleware(['auth', 'checkRole:admin'])->group(function () {
-    Route::resource('books', BookController::class)->except(['index']);
-    Route::resource('users', UserController::class);
-    Route::resource('transactions', TransactionController::class)->only(['create', 'store']);
-});
-
-// Member Only Routes
-Route::middleware(['auth', 'checkRole:member'])->group(function () {
-    Route::post('/books/{book}/borrow', [BookController::class, 'borrow'])
-        ->name('transactions.borrow');
-});
-
-// Authenticated Routes (Both Admin & Member)
-Route::middleware(['auth'])->group(function () {
+// Authenticated Routes (sudah login)
+Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::get('/books', [BookController::class, 'index'])->name('books.index');
-    Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
-    Route::post('/transactions/{transaction}/return', [TransactionController::class, 'return'])
-        ->name('transactions.return');
+    
+    // Books Routes (Admin & Member)
+    Route::resource('books', BookController::class)->except(['show']);
+    
+    // Transactions Routes (Admin & Member)
+    Route::resource('transactions', TransactionController::class)->except(['show']);
+    
+    // Users Routes (Admin Only)
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('users', UserController::class)->except(['show']);
+    });
 });
 ```
 
 ---
 
-## 8. VIEWS
+## G. REPOSITORY & INSTALASI DARI GITHUB
 
-### 8.1 Layout Utama
-Buat file `resources/views/layouts/app.blade.php`:
+### Repository Links:
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name') }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-</head>
+- **Google Drive:** http://s.id/AppPerpus
+- **GitHub:** https://github.com/VickyIbr/perpustakaan-telkom
 
-<body class="bg-gray-50">
-    @include('layouts.navbar')
-    <main class="container">
-        @yield('content')
-    </main>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-        integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"
-        integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7nz018oDNDe8iR0n8B46JvROS7bZs3IO2" crossorigin="anonymous"></script>
-</body>
-</html>
+### Cara Install dari Repository:
+
+1. Clone atau download project Laravel
+2. Buka project dengan VSCode
+3. Hapus folder `vendor` (jika masih ada)
+4. Jalankan command:
+```bash
+composer install
 ```
 
-### 8.2 Navbar
-Buat file `resources/views/layouts/navbar.blade.php`:
-
-```html
-<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
-    <div class="container">
-        <a class="navbar-brand" href="{{ route('books.index') }}">
-            Perpustakaan
-        </a>
-
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('books.*') ? 'active fw-semibold' : '' }}"
-                        href="{{ route('books.index') }}">
-                        Buku
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link {{ request()->routeIs('transactions.*') ? 'active fw-semibold' : '' }}"
-                        href="{{ route('transactions.index') }}">
-                        Transaksi
-                    </a>
-                </li>
-
-                @if (Auth::user()->role == 'admin')
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('users.*') ? 'active fw-semibold' : '' }}"
-                            href="{{ route('users.index') }}">
-                            Kelola Anggota
-                        </a>
-                    </li>
-                @endif
-            </ul>
-
-            <div class="d-flex align-items-center gap-3">
-                <div class="d-none d-lg-block">
-                    <div class="fw-semibold">{{ Auth::user()->name }}</div>
-                    <div class="text-muted small">
-                        {{ Auth::user()->role == 'admin'
-                            ? 'Administrator'
-                            : Auth::user()->major . ' . ' . Auth::user()->class }}
-                    </div>
-                </div>
-
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button class="btn btn-outline-danger btn-sm">Logout</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</nav>
+5. Copy file `.env.example` menjadi `.env`:
+```bash
+cp .env.example .env
 ```
 
-### 8.3 Login
-Buat file `resources/views/auth/login.blade.php`:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login - Perpustakaan</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light d-flex align-items-center justify-content-center vh-100">
-    <div class="card shadow-sm" style="width: 100%; max-width: 400px;">
-        <div class="card-body p-4">
-            <h3 class="text-center mb-4">Login</h3>
-            <form action="/login" method="POST">
-                @csrf
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        {{ $errors->first() }}
-                    </div>
-                @endif
-
-                <div class="mb-3">
-                    <label class="form-label">Username</label>
-                    <input type="text" name="username" class="form-control" required>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" required>
-                </div>
-
-                <button type="submit" class="btn btn-dark w-100">Login</button>
-            </form>
-
-            <p class="text-center mt-3 mb-0">
-                Belum punya akun? <a href="register">Daftar</a>
-            </p>
-        </div>
-    </div>
-</body>
-</html>
+6. Generate application key:
+```bash
+php artisan key:generate
 ```
 
-### 8.4 Register
-Buat file `resources/views/auth/register.blade.php`:
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Daftar Akun - Perpustakaan</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light d-flex align-items-center justify-content-center vh-100">
-    <div class="card shadow-sm" style="width: 100%; max-width: 500px;">
-        <div class="card-body p-4">
-            <h3 class="text-center mb-4">Daftar Akun</h3>
-            <form action="/register" method="POST">
-                @csrf
-
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <label class="form-label">NIS</label>
-                        <input type="number" name="school_id" class="form-control" required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Nama Lengkap</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Kelas</label>
-                        <input type="text" name="class" class="form-control" required>
-                    </div>
-
-                    <div class="col-md-6">
-                        <label class="form-label">Jurusan</label>
-                        <input type="text" name="major" class="form-control" required>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Username</label>
-                    <input type="text" name="username" class="form-control" required>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-control" required>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label">Konfirmasi Password</label>
-                    <input type="password" name="password_confirmation" class="form-control" required>
-                </div>
-
-                <button type="submit" class="btn btn-dark w-100">
-                    Daftar
-                </button>
-            </form>
-
-            <p class="text-center mt-3 mb-0">
-                Sudah punya akun? <a href="login">Login</a>
-            </p>
-        </div>
-    </div>
-</body>
-</html>
+7. Pada file `.env` ubah konfigurasi database:
+```env
+DB_CONNECTION=mysql
+DB_DATABASE=nama_database_anda
 ```
 
-### 8.5 Dashboard Buku (Index)
-Buat file `resources/views/books/index.blade.php`:
+8. Buat database di phpMyAdmin sesuai nama di `.env`
 
-```blade
-@extends('layouts.app')
-
-@section('title', 'Dashboard Buku')
-
-@section('content')
-<div class="container my-4">
-
-    <div class="card mb-4">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="mb-1">Dashboard Buku</h4>
-                <small class="text-muted">Ringkasan data buku di sistem</small>
-            </div>
-
-            @if (Auth::user()->role == 'admin')
-            <a href="{{ route('books.create') }}" class="btn btn-primary btn-sm">
-                + Tambah Buku
-            </a>
-            @endif
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0 align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Judul</th>
-                        <th>Penulis</th>
-                        <th>Penerbit</th>
-                        <th>Tahun</th>
-                        <th class="text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($books as $book)
-                        <tr>
-                            <td>{{ $book->title }}</td>
-                            <td>{{ $book->author }}</td>
-                            <td>{{ $book->publisher }}</td>
-                            <td>{{ $book->year }}</td>
-                            <td class="text-center">
-
-                                @if (Auth::user()->role == 'admin')
-                                    <a href="{{ route('books.edit', $book->id) }}"
-                                        class="btn btn-warning btn-sm">
-                                        Edit
-                                    </a>
-
-                                    <form action="{{ route('books.destroy', $book->id) }}"
-                                        method="POST" class="d-inline"
-                                        onsubmit="return confirm('Yakin ingin menghapus buku ini?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-danger btn-sm">
-                                            Hapus
-                                        </button>
-                                    </form>
-                                @else
-                                    @if (!$book->is_borrowed)
-                                        <form method="POST"
-                                            action="{{ route('transactions.borrow', $book->id) }}">
-                                            @csrf
-                                            <button class="btn btn-success btn-sm">
-                                                Pinjam
-                                            </button>
-                                        </form>
-                                    @else
-                                        <span class="badge bg-secondary">
-                                            Tidak Tersedia
-                                        </span>
-                                    @endif
-                                @endif
-
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                Tidak ada data buku
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-@endsection
+9. Jalankan migration dan seeder:
+```bash
+php artisan migrate:fresh --seed
 ```
 
-### 8.6 Dashboard Transaksi (Index)
-Buat file `resources/views/transactions/index.blade.php`:
+**atau**
 
-```blade
-@extends('layouts.app')
-
-@section('title', 'Dashboard Transaksi')
-
-@section('content')
-<div class="container my-4">
-
-    <div class="card mb-4">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="mb-1">Dashboard Transaksi</h4>
-                <small class="text-muted">Data peminjaman & pengembalian buku</small>
-            </div>
-
-            @if (Auth::user()->role == 'admin')
-                <a href="{{ route('transactions.create') }}" class="btn btn-primary btn-sm">
-                    Tambah Transaksi
-                </a>
-            @endif
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0 align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Kode Buku</th>
-                        <th>Judul Buku</th>
-                        @if (Auth::user()->role == 'admin')
-                            <th>Peminjam</th>
-                        @endif
-                        <th>Tgl Pinjam</th>
-                        <th>Tgl Kembali</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center">Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @forelse ($transactions as $transaction)
-                        <tr>
-                            <td>{{ $transaction->book->book_code }}</td>
-                            <td>{{ $transaction->book->title }}</td>
-
-                            @if (Auth::user()->role == 'admin')
-                                <td>{{ $transaction->user->name }}</td>
-                            @endif
-
-                            <td>{{ $transaction->borrowed_at->format('d M Y') }}</td>
-                            <td>
-                                {{ $transaction->returned_at
-                                    ? $transaction->returned_at->format('d M Y')
-                                    : '-' }}
-                            </td>
-
-                            <td class="text-center">
-                                @if ($transaction->status === 'borrowed')
-                                    <span class="badge bg-warning text-dark">
-                                        Dipinjam
-                                    </span>
-                                @else
-                                    <span class="badge bg-success">
-                                        Dikembalikan
-                                    </span>
-                                @endif
-                            </td>
-
-                            <td class="text-center">
-                                @if ($transaction->status === 'borrowed')
-                                    <form action="{{ route('transactions.return', $transaction->id) }}"
-                                        method="POST" class="d-inline">
-                                        @csrf
-                                        <button class="btn btn-sm btn-primary">
-                                            Kembalikan
-                                        </button>
-                                    </form>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
-                                Tidak ada data transaksi
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-@endsection
+```bash
+php artisan migrate
+php artisan db:seed
 ```
 
-### 8.7 Dashboard User (Index)
-Buat file `resources/views/users/index.blade.php`:
-
-```blade
-@extends('layouts.app')
-
-@section('title', 'Kelola Anggota')
-
-@section('content')
-<div class="container my-4">
-
-    <div class="card mb-4">
-        <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-                <h4 class="mb-1">Kelola Anggota</h4>
-                <small class="text-muted">Daftar member perpustakaan</small>
-            </div>
-
-            <a href="{{ route('users.create') }}" class="btn btn-primary btn-sm">
-                + Tambah User
-            </a>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0 align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>NIS</th>
-                        <th>Nama</th>
-                        <th>Kelas</th>
-                        <th>Jurusan</th>
-                        <th>Email</th>
-                        <th class="text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($users as $user)
-                        <tr>
-                            <td>{{ $user->school_id }}</td>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->class }}</td>
-                            <td>{{ $user->major }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td class="text-center">
-                                <a href="{{ route('users.edit', $user->id) }}"
-                                    class="btn btn-warning btn-sm">
-                                    Edit
-                                </a>
-
-                                <form action="{{ route('users.destroy', $user->id) }}"
-                                    method="POST" class="d-inline"
-                                    onsubmit="return confirm('Yakin ingin menghapus user ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-danger btn-sm">
-                                        Hapus
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
-                                Tidak ada data user
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-@endsection
+10. Jalankan project Laravel:
+```bash
+php artisan serve
 ```
 
----
+### Catatan Penting:
 
-## 9. STRUKTUR DIREKTORI VIEW
-
-Pastikan struktur folder view kamu seperti ini:
-
-```
-resources/views/
-├── layouts/
-│   ├── app.blade.php
-│   └── navbar.blade.php
-├── auth/
-│   ├── login.blade.php
-│   └── register.blade.php
-├── books/
-│   ├── index.blade.php
-│   ├── create.blade.php
-│   └── edit.blade.php
-├── transactions/
-│   ├── index.blade.php
-│   └── create.blade.php
-└── users/
-    ├── index.blade.php
-    ├── create.blade.php
-    └── edit.blade.php
-```
-
----
-
-## 10. TESTING APLIKASI
-
-### Login sebagai Admin
-- Username: `admin_perpustakaan`
-- Password: `admin123`
-
-### Fitur Admin
-- Kelola Buku (Create, Read, Update, Delete)
-- Kelola User/Anggota
-- Lihat Semua Transaksi
-- Tambah Transaksi Manual
-
-### Fitur Member
-- Lihat Daftar Buku
-- Pinjam Buku yang Tersedia
-- Lihat Transaksi Sendiri
-- Kembalikan Buku yang Dipinjam
+- Front-end menggunakan Bootstrap versi online, pastikan terhubung dengan internet
+- Default Admin: `admin@gmail.com` / `admin123`
+- Default Member: `member@gmail.com` / `member123`
 
 ---
 
 ## PENUTUP
 
-Dokumen ini mencakup semua kode dan konfigurasi yang diperlukan untuk membangun Aplikasi Perpustakaan Laravel 12 dengan fitur lengkap:
-- Authentication (Login & Register)
-- Role-based Access Control (Admin & Member)
-- CRUD Buku, Transaksi, dan User
-- Peminjaman dan Pengembalian Buku
-
-**Catatan**: Untuk view create dan edit (books, transactions, users), kamu bisa membuat form yang mirip dengan pattern yang sudah ada di `books/index.blade.php` menggunakan Bootstrap form components.
-
----
-
-**© SMK Telkom Jakarta 2026**
-
+Tutorial ini mencakup semua langkah pembuatan aplikasi Perpustakaan menggunakan Laravel 12, mulai dari instalasi hingga konfigurasi lengkap dengan fitur:
 </textarea>
 
 <script>
